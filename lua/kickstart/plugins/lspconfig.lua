@@ -14,6 +14,16 @@ return {
       -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
       -- used for completion, annotations and signatures of Neovim apis
       { 'folke/neodev.nvim', opts = {} },
+
+      -- NOTE: Added configuration
+      { 'VonHeikemen/lsp-zero.nvim', branch = 'v3.x' },
+      { 'neovim/nvim-lspconfig' },
+      { 'hrsh7th/cmp-nvim-lsp' },
+      { 'hrsh7th/nvim-cmp' },
+      { 'L3MON4D3/LuaSnip' },
+      require 'custom.plugins.typescript-tools',
+      -- NOTE: End of added configuration
+
       require 'custom.plugins.typescript-tools',
     },
     config = function()
@@ -135,18 +145,26 @@ return {
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+      local default_setup = function(server)
+        require('lspconfig')[server].setup {
+          capabilities = lsp_capabilities,
+        }
+      end
+
       local servers = {
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
-        -- rust_analyzer = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
+        tsserver = {},
         --
 
         lua_ls = {
@@ -182,13 +200,38 @@ return {
 
       require('mason-lspconfig').setup {
         handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for tsserver)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
+          -- function(server_name)
+          --   local server = servers[server_name] or {}
+          --   -- This handles overriding only values explicitly passed
+          --   -- by the server configuration above. Useful when disabling
+          --   -- certain features of an LSP (for example, turning off formatting for tsserver)
+          --   server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+          --   require('lspconfig')[server_name].setup(server)
+          -- end,
+          default_setup,
+        },
+      }
+
+      local cmp = require 'cmp'
+
+      cmp.setup {
+        sources = {
+          -- Copilot source
+          { name = 'copilot', group_index = 2 },
+          -- Other sources
+          { name = 'nvim_lsp', group_index = 2 },
+          { name = 'path', group_index = 2 },
+        },
+        mapping = cmp.mapping.preset.insert {
+          -- Enter key confirms completion item
+          ['<CR>'] = cmp.mapping.confirm { select = false },
+
+          -- Ctrl + space triggers completion menu
+          ['<C-Space>'] = cmp.mapping.complete(),
+        },
+        snippet = {
+          expand = function(args)
+            require('luasnip').lsp_expand(args.body)
           end,
         },
       }

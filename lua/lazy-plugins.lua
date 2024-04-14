@@ -40,6 +40,7 @@ require('lazy').setup({
   -- NOTE: Themes
 
   require 'kickstart.plugins.theme',
+  require 'custom.plugins.Themes.tokyo-night',
   require 'custom.plugins.Themes.catppuccin',
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -54,6 +55,7 @@ require('lazy').setup({
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'custom.plugins.windows',
+  require 'custom.plugins.lualine',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -65,6 +67,7 @@ require('lazy').setup({
   -- require 'custom.plugins.typescript-tools',
   require 'custom.plugins.copilot-cmp',
   require 'custom.plugins.copilot-chat',
+  require 'custom.plugins.neo-tree',
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
